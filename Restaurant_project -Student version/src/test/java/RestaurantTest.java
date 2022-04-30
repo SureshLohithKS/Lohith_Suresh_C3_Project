@@ -3,6 +3,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.mockito.listeners.MockitoListener;
+import java.util.*;
 
 import java.time.LocalTime;
 
@@ -27,7 +28,7 @@ class RestaurantTest {
         Restaurant restaurant1 = Mockito.spy(restaurant);
         LocalTime present = LocalTime.parse("20:00:00");
         Mockito.when(restaurant1.getCurrentTime()).thenReturn(present);
-        assertEquals(true, restaurant1.isRestaurantOpen());
+        assertTrue(restaurant1.isRestaurantOpen());
     }
 
     @Test
@@ -35,7 +36,7 @@ class RestaurantTest {
         Restaurant restaurant1 = Mockito.spy(restaurant);
         LocalTime present = LocalTime.parse("09:00:00");
         Mockito.when(restaurant1.getCurrentTime()).thenReturn(present);
-        assertEquals(false, restaurant1.isRestaurantOpen());
+        assertFalse(restaurant1.isRestaurantOpen());
     }
 
     //<<<<<<<<<<<<<<<<<<<<<<<<<OPEN/CLOSED>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -60,4 +61,49 @@ class RestaurantTest {
                 ()->restaurant.removeFromMenu("French fries"));
     }
     //<<<<<<<<<<<<<<<<<<<<<<<MENU>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    //<<<<<<<<<<<<<<<<<<<<<<<Price>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    @Test
+    public void adding_2_items_to_menu_finding_total_cost_of_2_items() throws itemNotFoundException
+    {
+        restaurant.addToMenu("Dosa", 100);
+        restaurant.addToMenu("Paratha", 150);
+        
+        ArrayList<String> items = new ArrayList<>();
+        items.add("Dosa");
+        items.add("Paratha");
+        int totalPrice = restaurant.getCost(items);
+        assertEquals(250, totalPrice);
+    }
+
+    @Test
+    public void adding_2_items_to_menu_finding_total_cost_of_not_added_item_should_raise_exception() throws itemNotFoundException
+    {
+        restaurant.addToMenu("Dosa", 100);
+        restaurant.addToMenu("Paratha", 150);
+
+        ArrayList<String> items = new ArrayList<>();
+        items.add("Dosa");
+        items.add("Paratha");
+        items.add("Roti");
+        assertThrows(itemNotFoundException.class, ()->restaurant.getCost(items));
+    }
+
+    @Test
+    public void adding_3_items_to_menu_finding_total_cost_with_one_repeated_item_should_exclude_repeated_item() throws itemNotFoundException
+    {
+        restaurant.addToMenu("Dosa", 100);
+        restaurant.addToMenu("Paratha", 150);
+        restaurant.addToMenu("Roti", 50);
+
+        ArrayList<String> items = new ArrayList<>();
+        items.add("Dosa");
+        items.add("Paratha");
+        items.add("Roti");
+        items.add("Roti");
+
+        int totalPrice = restaurant.getCost(items);
+        assertEquals(300, totalPrice);
+    }
+    //<<<<<<<<<<<<<<<<<<<<<<<Price>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 }
+
